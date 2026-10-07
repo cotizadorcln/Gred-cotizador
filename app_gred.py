@@ -40,26 +40,27 @@ with tab1:
         st.write("")
         add = st.button("➕ Agregar")
     
-    if "items" not in st.session_state:
-        st.session_state.items = []
+    # "items" collides with SessionStateProxy.items(); use a non-method key.
+    if "quote_items" not in st.session_state:
+        st.session_state.quote_items = []
     
     if add and modelo:
-        st.session_state.items.append({"modelo": modelo, "cant": cant})
+        st.session_state.quote_items.append({"modelo": modelo, "cant": cant})
         st.success(f"Agregado {cant} x {modelo}")
     
-    if st.session_state.items:
+    if st.session_state.quote_items:
         st.write("**Productos en cotización:**")
-        for i, it in enumerate(st.session_state.items):
+        for i, it in enumerate(st.session_state.quote_items):
             p = products[it["modelo"]]
             unit = p["usd"] if moneda == "USD" else p["mxn"]
             st.write(f"{it['cant']} × {it['modelo']} ({p['capacidad']}) — {unit:,.2f}")
         
         if st.button("🗑️ Limpiar"):
-            st.session_state.items = []
+            st.session_state.quote_items = []
             st.rerun()
         
         if st.button("📄 Generar PDF", type="primary"):
-            path, total, mon = generar_cotizacion(st.session_state.items, cliente=cliente, moneda=moneda)
+            path, total, mon = generar_cotizacion(st.session_state.quote_items, cliente=cliente, moneda=moneda)
             st.success(f"Cotización generada · Total: {mon} {total:,.2f}")
             with open(path, "rb") as f:
                 st.download_button("⬇️ Descargar PDF", f, file_name=os.path.basename(path), mime="application/pdf")
